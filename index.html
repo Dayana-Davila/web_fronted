@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tablero de Asistencia en Tiempo Real</title>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+    <div class="header-container">
+    <h1>📋 Asistencia de 2DO TÉCNICO</h1>
+    
+    <img src="logo.uemam.png" alt="Logo Institucional" class="logo-institucional">
+</div>
+    <p>Hora de Corte: 7:00:00 AM</p>
+
+    <div id="lista-asistencia">
+    </div>
+
+    <div style="text-align: center; margin-bottom: 20px;">
+        <button id="btnLimpiar" onclick="limpiarAsistencia()">Comenzar Nuevo Día (Limpiar Asistencia)</button>
+        <p>La hora límite para asistencia es las 7:00 AM.</p>
+    </div>
+
+    <table id="tablaAsistencia">
+        <thead>
+            <tr>
+                <th>Nombre Completo</th>
+                <th>Estado</th>
+                <th>Hora de Registro</th>
+            </tr>
+        </thead>
+        <tbody id="cuerpoTabla">
+        </tbody>
+    </table>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    
+    <script src="script.js"></script>
+    
+</body>
+</html>

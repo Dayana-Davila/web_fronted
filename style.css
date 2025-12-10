@@ -1,0 +1,112 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f4f7f6;
+}
+
+h1 {
+    color: #333;
+
+}
+
+/* Oculta la estructura de lista que ya no usamos */
+#lista-asistencia {
+    display: none; 
+}
+
+
+/* ========================================= */
+/* ESTILO PARA LA TABLA DE ASISTENCIA */
+/* ========================================= */
+#tablaAsistencia {
+    /* Define el ancho de la tabla y la centra */
+    width: 90%;
+    margin: 30px auto; 
+    border-collapse: collapse; /* Quita el espacio entre bordes de celda */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    background-color: white; /* Fondo blanco */
+}
+
+/* Estilo para los encabezados de la tabla (THEAD) */
+#tablaAsistencia thead th {
+    background-color: #007bff; /* Color Azul de fondo */
+    color: white;
+    padding: 15px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 1.1em;
+    border-bottom: 2px solid #0056b3;
+}
+
+/* Estilo general para las celdas (TBODY) */
+#tablaAsistencia tbody td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee; /* Línea separadora suave */
+    font-size: 0.95em;
+    color: #333;
+}
+
+/* Efecto de mouse al pasar sobre la fila */
+#tablaAsistencia tbody tr:hover {
+    background-color: #f1f8ff; /* Azul muy claro al pasar el mouse */
+}
+
+/* --- COLORES SEGÚN EL ESTADO DE ASISTENCIA (CORREGIDOS) --- */
+
+/* Clase para ASISTENCIA (Verde claro) */
+.asistencia {
+    background-color: #d4edda;
+    color: #155724; 
+    font-weight: bold;
+}
+
+/* Clase para ATRASO / TARDANZA (Amarillo claro) */
+.tardanza {
+    background-color: #fff3cd; 
+    color: #856404; 
+    font-weight: bold;
+}
+
+/* Clase para INASISTENCIA (rojo claro) */
+.inasistencia {
+    background-color: #ebe3e3;
+    color: #d84141;
+}
+
+/* Estilo para el botón Limpiar */
+#btnLimpiar {
+    background-color: #beb7bb; /* Gris */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s;
+}
+
+#btnLimpiar:hover {
+    background-color: #6aec36;
+}
+/* ========================================= */
+/* NUEVOS ESTILOS PARA EL LOGO Y ENCABEZADO */
+/* ========================================= */
+
+/* Contenedor principal del encabezado */
+.header-container {
+    display: flex; /* Habilita el alineamiento en fila */
+    justify-content: space-between; /* Mueve el título a la izquierda y el logo a la derecha */
+    align-items: center; /* Centra verticalmente */
+    
+    /* La línea azul ahora va aquí, debajo de todo el encabezado */
+    border-bottom: 3px solid #007bff; 
+    padding-bottom: 10px;
+    margin-bottom: 20px; 
+}
+
+/* Estilo para la imagen del logo */
+.logo-institucional {
+    width: 80px; /* Define un tamaño adecuado */
+    height: auto; 
+}
