@@ -1,128 +1,117 @@
-// script.js - Conexión en tiempo real a Firebase
+// script.js
 
-// =========================================================
-// 1. CONFIGURACIÓN DE FIREBASE (¡CRÍTICO: REEMPLAZA TUS CREDENCIALES!)
-// =========================================================
+// --- Asume que tu configuración de Firebase está aquí: ---
+/*
 const firebaseConfig = {
-    // ⚠️ Reemplaza con los datos de tu proyecto
-    apiKey: "AIzaSyDLFAkvyVj6dVv8csuL9HvqRUv_3FzasHw", 
-    authDomain: "tecnico-c3c48.firebaseapp.com",
-    projectId: "tecnico-c3c48",
-    storageBucket: "tecnico-c3c48.firebasestorage.app",
-    appId: "1:923208931684:web:1277e3dc3f0bd8a6fb0271"
+    apiKey: "...",
+    authDomain: "...",
+    projectId: "...",
+    storageBucket: "...",
+    messagingSenderId: "...",
+    appId: "..."
 };
-
-// Inicializa Firebase
 firebase.initializeApp(firebaseConfig);
+*/
 const db = firebase.firestore();
 
-// =========================================================
-// 2. FUNCIÓN DE LIMPIEZA (Para el botón "Comenzar Nuevo Día")
-// =========================================================
-function limpiarAsistencia() {
-    if (confirm("⚠️ ¿Estás segura de que quieres borrar TODOS los registros de asistencia del día para comenzar de nuevo?")) {
-        
-        // Usa la colección CORRECTA para la asistencia diaria
-        const coleccionAsistencia = db.collection('asistencia_diaria');
-        
-        // Obtiene todos los documentos y los elimina en lotes
-        coleccionAsistencia.get().then(snapshot => {
-            
-            const batch = db.batch(); 
-            snapshot.docs.forEach(doc => {
-                batch.delete(doc.ref);
-            });
+// =========================================================================
+// 1. FUNCIÓN PARA CARGAR ASISTENCIA POR FECHA (USANDO EL FILTRO)
+// =========================================================================
 
-            return batch.commit(); 
-        }).then(() => {
-            alert("✅ Asistencia limpiada con éxito. ¡Comenzamos nuevo día!");
-            location.reload(); 
-        }).catch(error => {
-            console.error("Error al limpiar:", error);
-            alert("Hubo un error al limpiar la asistencia. Revisa la consola.");
-        });
-    }
-}
-
-
-// =========================================================
-// 3. FUNCIÓN DE CARGA DE TABLA (Lógica principal: Lista Completa y ORDENADA)
-// =========================================================
-function cargarTabla() {
-    const cuerpoTabla = document.getElementById('cuerpoTabla');
+function cargarAsistenciaPorFecha() {
+    const fechaInput = document.getElementById('fechaSeleccionada');
+    const fechaFiltro = fechaInput.value; // Obtiene la fecha en formato YYYY-MM-DD
     
-    // 1. Escucha los cambios en la asistencia diaria (colección: asistencia_diaria)
-    db.collection('asistencia_diaria').onSnapshot(async (asistenciaSnapshot) => {
+    if (!fechaFiltro) {
+        alert('Por favor, selecciona una fecha para consultar el reporte.');
+        return;
+    }
+
+    console.log(`Cargando asistencia para la fecha: ${fechaFiltro}`);
+    
+    // Paso 1: Obtener la lista maestra de estudiantes para poder mostrar a los "Ausentes".
+    // Esto requiere que tengas una colección 'Estudiantes' que liste a todos los alumnos.
+    db.collection("Estudiantes").get().then(snapshotEstudiantes => {
+        const listaEstudiantes = {};
         
-        // Mapea los registros de asistencia hoy para acceso rápido
-        const asistenciaHoy = {};
-        asistenciaSnapshot.forEach(doc => {
-            const registro = doc.data();
-            // La clave es el nombre completo (campo 'nombre' que guarda Python)
-            asistenciaHoy[registro.nombre] = registro; 
+        // Inicializar a todos como Ausente
+        snapshotEstudiantes.forEach(doc => {
+            const data = doc.data();
+            listaEstudiantes[data.nombre] = {
+                nombre: data.nombre,
+                estado: "Ausente", 
+                hora_entrada: ""
+            };
         });
 
-        try {
-            // 2. Carga la lista maestra de estudiantes (Colección: Estudiantes con E mayúscula)
-            const estudiantesSnapshot = await db.collection('Estudiantes').get();
-            
-            // 🟢 PASO 1: Convierta la lista (snapshot) en un array para poder ordenarlo
-            let listaEstudiantes = [];
-            estudiantesSnapshot.forEach(doc => {
-                listaEstudiantes.push(doc.data());
-            });
-            
-            // 🟢 PASO 2: Ordena el array alfabéticamente por 'nombre_completo'
-            listaEstudiantes.sort((a, b) => {
-                // Compara el nombre completo del estudiante A con el estudiante B
-                if (a.nombre_completo < b.nombre_completo) return -1;
-                if (a.nombre_completo > b.nombre_completo) return 1;
-                return 0; // Son iguales
-            });
-
-            cuerpoTabla.innerHTML = ''; // Limpia la tabla
-            
-            // 🟢 PASO 3: Itera sobre el ARRAY ORDENADO y dibuja las filas
-            listaEstudiantes.forEach(estudiante => {
-                const nombre = estudiante.nombre_completo; // Nombre completo de la lista maestra
-                const fila = cuerpoTabla.insertRow();
-                
-                // Compara el nombre completo de la lista maestra con los registros de hoy
-                const registro = asistenciaHoy[nombre];
-                
-                let estado = 'Inasistencia';
-                let hora = '---';
-                let claseFila = 'inasistencia'; // Clase CSS para colorear
-                
-                if (registro) {
-                    // Si el estudiante SÍ fue reconocido
-                    estado = registro.estado; // 'Asistencia' o 'Atraso'
-                    
-                    // Convierte el timestamp a hora legible
-                    let date = new Date(registro.timestamp * 1000); 
-                    hora = date.toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    
-                    if (estado === 'Asistencia') {
-                        claseFila = 'asistencia';
-                    } else if (estado === 'Atraso') { 
-                        claseFila = 'tardanza';
-                    }
+        // Paso 2: Consultar la colección 'asistencia_diaria' filtrando por la fecha seleccionada
+        db.collection("asistencia_diaria")
+          .where("fecha", "==", fechaFiltro) // <-- ¡El filtro principal!
+          .get()
+          .then(snapshotAsistencia => {
+              
+            // Actualizar el estado de los que sí registraron ese día
+            snapshotAsistencia.forEach(doc => {
+                const data = doc.data();
+                // Si el estudiante está en la lista maestra, actualizamos su estado
+                if (listaEstudiantes[data.nombre]) {
+                    listaEstudiantes[data.nombre].estado = data.estado;
+                    listaEstudiantes[data.nombre].hora_entrada = data.hora_entrada;
                 }
-                
-                // Inserta las celdas en la fila
-                fila.classList.add(claseFila);
-                fila.insertCell(0).innerText = nombre;
-                fila.insertCell(1).innerText = estado;
-                fila.insertCell(2).innerText = hora;
             });
             
-        } catch(e) {
-             console.error("Error al cargar la tabla maestra:", e);
-             // Mensaje corregido para reflejar el nombre de colección correcto
-             alert("Error crítico: Verifica que la colección 'Estudiantes' exista y tenga documentos.");
-        }
+            // Paso 3: Actualizar la tabla HTML con la lista final
+            actualizarTabla(Object.values(listaEstudiantes));
+
+            if (Object.keys(listaEstudiantes).length === 0) {
+                 alert("No se encontraron registros de estudiantes para esa fecha o la lista maestra está vacía.");
+            }
+            
+        }).catch(error => {
+            console.error("Error al cargar registros de asistencia:", error);
+            alert("Error al cargar los datos del día. Revisa la consola.");
+        });
+
+    }).catch(error => {
+        console.error("Error al cargar la lista de estudiantes:", error);
+        alert("Error al obtener la lista de estudiantes. ¡Asegúrate de tener una colección 'Estudiantes'!");
     });
 }
 
-// Inicia la carga de la tabla cuando la página esté lista
-document.addEventListener('DOMContentLoaded', cargarTabla);
+
+// =========================================================================
+// 2. FUNCIÓN PARA DIBUJAR LA TABLA (UTILIZADA POR LA CARGA DIARIA Y EL HISTÓRICO)
+// =========================================================================
+
+function actualizarTabla(estudiantes) {
+    const tbody = document.getElementById('cuerpoTabla');
+    tbody.innerHTML = ''; // Limpia la tabla antes de llenarla con nuevos datos
+    
+    // Ordenar alfabéticamente por nombre completo
+    estudiantes.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+    estudiantes.forEach(estudiante => {
+        const row = tbody.insertRow();
+        
+        // Columna Nombre
+        const cellNombre = row.insertCell();
+        cellNombre.textContent = estudiante.nombre;
+        
+        // Columna Estado
+        const cellEstado = row.insertCell();
+        cellEstado.textContent = estudiante.estado;
+        
+        // Columna Hora
+        const cellHora = row.insertCell();
+        cellHora.textContent = estudiante.hora_entrada || '-'; // Muestra '-' si está ausente
+        
+        // Dar estilo (usando las clases CSS que definiste, por ejemplo en style.css)
+        if (estudiante.estado === 'Atraso') {
+            row.classList.add('atraso');
+        } else if (estudiante.estado === 'Asistencia') {
+            row.classList.add('asistencia');
+        } else if (estudiante.estado === 'Ausente') {
+            row.classList.add('ausente');
+        }
+    });
+}

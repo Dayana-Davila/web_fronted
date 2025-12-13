@@ -1,13 +1,7 @@
 body {
     font-family: Arial, sans-serif;
     margin: 20px;
-    background-color: #f4f7f6;
-}
-
-h1 {
-    color: #333;
-
-}
+    background-color: #f4f7f6;}
 
 /* Oculta la estructura de lista que ya no usamos */
 #lista-asistencia {
