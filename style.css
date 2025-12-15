@@ -1,29 +1,143 @@
+/* ========================================= */
+/* ESTRUCTURA GENERAL Y LAYOUT (INSPIRACIÓN RUNACHAY) */
+/* ========================================= */
 body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    background-color: #f4f7f6;}
-
-/* Oculta la estructura de lista que ya no usamos */
-#lista-asistencia {
-    display: none; 
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    background-color: #f4f7f6; /* Fondo gris claro */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden; /* Evita scroll horizontal */
 }
 
-
-/* ========================================= */
-/* ESTILO PARA LA TABLA DE ASISTENCIA */
-/* ========================================= */
-#tablaAsistencia {
-    /* Define el ancho de la tabla y la centra */
-    width: 90%;
-    margin: 30px auto; 
-    border-collapse: collapse; /* Quita el espacio entre bordes de celda */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave */
-    background-color: white; /* Fondo blanco */
+/* --- BARRA SUPERIOR (HEADER) --- */
+.top-nav {
+    /* Degradado principal de Runachay (Azul a Morado) */
+    background: linear-gradient(to right, #007bff, #6a11cb);
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000; /* Asegura que esté encima de todo */
 }
 
-/* Estilo para los encabezados de la tabla (THEAD) */
-#tablaAsistencia thead th {
-    background-color: #007bff; /* Color Azul de fondo */
+.header-title h1 {
+    font-size: 1.2em;
+    margin: 0;
+    font-weight: 400;
+}
+
+.menu-icon, .user-info {
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.user-info span {
+    font-size: 0.8em;
+    margin-left: 5px;
+}
+
+/* --- CONTENEDOR PRINCIPAL Y FLEX --- */
+.main-container {
+    display: flex;
+    flex-grow: 1;
+}
+
+/* --- BARRA LATERAL (SIDEBAR) --- */
+.sidebar {
+    width: 250px;
+    background-color: #1d3e5c; /* Azul oscuro corporativo */
+    color: white;
+    padding: 0;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    min-height: 100%;
+    z-index: 100;
+    flex-shrink: 0;
+}
+
+.sidebar-logo-container {
+    padding: 30px 0 20px 0;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sidebar-logo {
+    max-width: 80%;
+    height: auto;
+}
+
+/* Clase para ocultar la barra lateral (animación) */
+.sidebar.hidden {
+    transform: translateX(-250px);
+}
+
+.nav-link {
+    display: block;
+    padding: 15px 20px;
+    color: #ecf0f1;
+    text-decoration: none;
+    transition: background-color 0.2s;
+    font-size: 1em;
+}
+
+.nav-link:hover, .nav-link.active {
+    background-color: #2c3e50; /* Resalta con el fondo más oscuro */
+    color: white;
+}
+
+.nav-link i {
+    margin-right: 10px;
+    width: 20px;
+}
+
+/* --- CONTENIDO PRINCIPAL --- */
+.content {
+    flex-grow: 1;
+    padding: 20px;
+    transition: margin-left 0.3s ease;
+    overflow-x: hidden;
+}
+
+/* La clase para el contenido cuando la barra está oculta ya no es necesaria con flex,
+   pero la mantenemos para compatibilidad con JS toggleSidebar original. */
+.content.full-width {
+    margin-left: 0;
+}
+
+/* --- ESTILOS DE TÍTULO Y TABLA --- */
+.main-title-display {
+    font-size: 2.2em;
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 3px solid #007bff; /* Línea de acento azul */
+    text-transform: uppercase;
+}
+
+.time-info {
+    font-size: 0.9em;
+    color: #6c757d;
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+/* Tablas - Estilo profesional */
+#tablaAsistencia, #tablaRegistrosHistoricos {
+    width: 100%;
+    margin: 30px 0;
+    border-collapse: collapse;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+#tablaAsistencia thead th, #tablaRegistrosHistoricos thead th {
+    background-color: #007bff;
     color: white;
     padding: 15px;
     text-align: left;
@@ -32,44 +146,38 @@ body {
     border-bottom: 2px solid #0056b3;
 }
 
-/* Estilo general para las celdas (TBODY) */
-#tablaAsistencia tbody td {
+#tablaAsistencia tbody td, #tablaRegistrosHistoricos tbody td {
     padding: 12px 15px;
-    border-bottom: 1px solid #eee; /* Línea separadora suave */
+    border-bottom: 1px solid #eee;
     font-size: 0.95em;
     color: #333;
 }
 
-/* Efecto de mouse al pasar sobre la fila */
-#tablaAsistencia tbody tr:hover {
-    background-color: #f1f8ff; /* Azul muy claro al pasar el mouse */
+#tablaAsistencia tbody tr:hover, #tablaRegistrosHistoricos tbody tr:hover {
+    background-color: #f1f8ff;
 }
 
-/* --- COLORES SEGÚN EL ESTADO DE ASISTENCIA (CORREGIDOS) --- */
-
-/* Clase para ASISTENCIA (Verde claro) */
+/* Clases de Estado (Semáforo) */
 .asistencia {
-    background-color: #d4edda;
-    color: #155724; 
+    background-color: #d4edda; /* Verde claro */
+    color: #155724;
     font-weight: bold;
 }
 
-/* Clase para ATRASO / TARDANZA (Amarillo claro) */
 .tardanza {
-    background-color: #fff3cd; 
-    color: #856404; 
+    background-color: #fff3cd; /* Amarillo claro */
+    color: #856404;
     font-weight: bold;
 }
 
-/* Clase para INASISTENCIA (rojo claro) */
 .inasistencia {
-    background-color: #ebe3e3;
-    color: #d84141;
+    background-color: #f8d7da; /* Rojo claro */
+    color: #721c24;
 }
 
-/* Estilo para el botón Limpiar */
+/* Botón y Filtros */
 #btnLimpiar {
-    background-color: #beb7bb; /* Gris */
+    background-color: #dc3545; /* Rojo de acción peligrosa (Limpiar) */
     color: white;
     border: none;
     padding: 10px 20px;
@@ -81,26 +189,37 @@ body {
 }
 
 #btnLimpiar:hover {
-    background-color: #6aec36;
-}
-/* ========================================= */
-/* NUEVOS ESTILOS PARA EL LOGO Y ENCABEZADO */
-/* ========================================= */
-
-/* Contenedor principal del encabezado */
-.header-container {
-    display: flex; /* Habilita el alineamiento en fila */
-    justify-content: space-between; /* Mueve el título a la izquierda y el logo a la derecha */
-    align-items: center; /* Centra verticalmente */
-    
-    /* La línea azul ahora va aquí, debajo de todo el encabezado */
-    border-bottom: 3px solid #007bff; 
-    padding-bottom: 10px;
-    margin-bottom: 20px; 
+    background-color: #c82333;
 }
 
-/* Estilo para la imagen del logo */
-.logo-institucional {
-    width: 80px; /* Define un tamaño adecuado */
-    height: auto; 
+.filtros-historial {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.filtros-historial label {
+    font-weight: 600;
+    color: #333;
+}
+
+.filtros-historial input[type="date"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.filtros-historial button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.filtros-historial button:hover {
+    background-color: #0056b3;
 }
