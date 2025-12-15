@@ -233,7 +233,48 @@ async function cargarRegistrosPorFecha(fechaSeleccionada = document.getElementBy
 // =========================================================
 // 5. FUNCIÓN DE LIMPIEZA (Corregida para manejar tildes de forma universal)
 // =========================================================
+// =========================================================
+// 5B. FUNCIÓN DE LIMPIEZA DE ASISTENCIA DIARIA
+// =========================================================
 
+async function limpiarAsistencia() {
+    // 1. Confirmación de seguridad
+    const confirmacion = confirm("ADVERTENCIA: ¿Estás seguro de que deseas ELIMINAR TODOS los registros de asistencia diaria de la base de datos? Esta acción es irreversible.");
+
+    if (!confirmacion) {
+        return; // Detiene la ejecución si el usuario cancela
+    }
+
+    const cuerpoTabla = document.getElementById('cuerpoTablaHoy');
+    cuerpoTabla.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Eliminando registros... Por favor, espera.</td></tr>';
+
+    try {
+        // 2. Obtener todos los documentos de la colección 'asistencia_diaria'
+        const snapshot = await db.collection('asistencia_diaria').get();
+        
+        const batch = db.batch(); // Usar un 'batch' para operaciones múltiples más eficientes
+        let count = 0;
+
+        snapshot.docs.forEach(doc => {
+            // 3. Añadir cada documento al batch para ser borrado
+            batch.delete(doc.ref);
+            count++;
+        });
+
+        // 4. Ejecutar todas las eliminaciones a la vez
+        await batch.commit();
+
+        // 5. Retroalimentación al usuario
+        alert(`Éxito: Se han eliminado ${count} registros de asistencia diaria.`);
+
+        cargarTablaHoy(); 
+
+    } catch (error) {
+        console.error("Error al limpiar la asistencia:", error);
+        alert("Error al intentar limpiar la asistencia. Revisa la consola para más detalles.");
+        cargarTablaHoy(); // Volver a cargar si falla
+    }
+}
 const limpiarClave = (name) => {
     if (!name) return "";
     
